@@ -1,0 +1,208 @@
+---
+title: "Missing Data"
+author: "Syed Jafar Raza Rizvi <br> NSID: cfr954 <br> Student ID: 11344782"
+output:
+  html_document:
+    keep_md: true
+date: "2025-02-11"
+zotero: true
+bibliography: scholar.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(visdat)
+library(naniar)
+library(mice)
+library(bookdown)
+library(VIM)
+```
+# 1. **Dataset Exploration**  
+   - Load the provided health administrative dataset.  
+   - Explore the dataset to identify the extent, patterns, and potential reasons for missing data.  
+   - Summarize findings using tables, charts, or heatmaps to visualize missingness.  
+   
+## - Load the provided health administrative dataset.
+```{r}
+data<-read.csv("can_path_data.csv")
+# data <- data %>% select(ID:HS_GEN_HEALTH, PA_TOTAL_SHORT, PM_BMI_SR, contains("_EVER"), contains("WRK_"))
+```
+
+## - Explore the dataset to identify the extent, patterns, and potential reasons for missing data.
+
+### Explore Dataset 
+
+**Check the structure of the dataset**
+
+```{r}
+
+dim(data)
+
+df_info <- data.frame(
+  Variable = names(data), 
+  Type = sapply(data, class)  # Gets the data type of each variable
+)
+print(df_info, row.names = FALSE)  # Print full output
+```
+
+In this health administrative dataset, there are 41,187 observations and 440 variables. Most of these variables are integers, numeric, or character, which makes sense. However, some variables are being treated as logical. Let’s identify those logical variables.
+
+```{r}
+data %>% 
+  select_if(is_logical) %>% 
+  glimpse()
+```
+
+
+We have 9 variables that are logical so let's drop those.
+
+
+```{r}
+### Select specific columns
+logical_cols <- c("DIS_GEN_DS_EVER", "DIS_GEN_SCA_EVER", "DIS_GEN_THALASSEMIA_EVER", "DIS_GEN_CAH_EVER", "DIS_GEN_AIS_EVER", "DIS_GEN_HEMOPHILIA_EVER", "DIS_GEN_CF_EVER", "DIS_GEN_KS_EVER", "DIS_GEN_TS_EVER")
+
+data <- data %>% select(!(logical_cols))
+```
+**Identify Missing Data**
+
+
+```{r}
+missing_table <- miss_var_summary(data)
+missing_table
+```
+Although the proportion of missing data can influence statistical inference, there are no universally accepted guidelines for the maximum amount of missing data for which multiple imputation (MI) remains beneficial. One study suggests that when over 10% of data are missing, the estimates may become biased [@bennett2001can]. Another paper proposes 5% as a threshold, below which MI is unlikely to provide significant benefits [@schafer1999multiple]. However, limited evidence exists to support these cutoff points. Few studies have explored how bias and efficiency change with increasing levels of missing data, with the most extreme case being 50% missing data, which showed growing inconsistency in effect estimates as missingness increased [@mishra2014comparative] for the small sample. However, when both high missing data and large sample sizes are considered as missing data being at random (MAR) [@lee2012recovery]. In this analysis, I consider missing values with less than 50 percent in this dataset.
+
+let's review filter out all variables with more than 50% missing.
+
+
+```{r}
+data <- data %>%
+          select(where(~sum(is.na(.x))/length(.x) < 0.80))
+
+missing_table <- miss_var_summary(data)
+```
+```{r}
+missing_table <- miss_var_summary(data)
+missing_table
+```
+
+### Summarize findings using tables, charts, or heatmaps to visualize missingness. 
+
+```{r}
+gg_miss_upset(data, order.by = "freq", nsets = 10)
+```
+
+Suppose we want to make mode where 
+We have identified the outcome and predictors variable. Follwoing are the outcoma and predictor variables.
+
+## Main Outcome of Interest: 
+
+BMI: Body Mass Index (PM_BMI_SR).
+
+## Expouser
+
+PA: Physical Activities: PA_TOTAL_SHORT
+
+SL: Sedentary lifestyle: Total sitting time per week:PA_TOTAL_SIT_TIME 
+
+## Predictors:
+
+### Social and demographic factor:
+
+EB: Participant's ethnic background is Aboriginal (e.g. First Nations, Metis, Inuit).:SDC_EB_ABORIGINAL
+
+AGE: Age of the respondent: SDC_AGE_CALC
+
+GE: Gender: SDC_GENDER
+
+ES: Employment Status: WRK_EMPLOYMENT
+
+GPH: General perception of health: HS_GEN_HEALTH
+
+FI: Food Intake: NUT_VEG_QTY, NUT_FRUITS_QTY
+
+SM: Smoking status: SMK_CIG_STATUS
+
+AC: Alcohol consumption: ALC_CUR_FREQ
+
+### Phychological factor:
+
+DE: Depression: DIS_DEP_EVER
+
+### Choronic health condition 
+
+DIA: Diabetes: DIS_DIAB_TYPE
+
+
+### Enviromental factor:
+
+
+RE: Region: ADM_STUDY_ID
+```{r}
+data<- data %>%
+  select(ID, PM_BMI_SR, PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME , SDC_EB_ABORIGINAL, SDC_AGE_CALC, SDC_GENDER, WRK_EMPLOYMENT, HS_GEN_HEALTH, NUT_VEG_QTY, NUT_FRUITS_QTY, SMK_CIG_STATUS, ALC_CUR_FREQ, DIS_DEP_EVER, DIS_DIAB_TYPE , ADM_STUDY_ID)
+col<-c("SDC_EB_ABORIGINAL", "SDC_GENDER", "WRK_EMPLOYMENT", "WRK_EMPLOYMENT", "HS_GEN_HEALTH", "SMK_CIG_STATUS", "ALC_CUR_FREQ",
+       "DIS_DEP_EVER", "DIS_DIAB_TYPE", "ADM_STUDY_ID")
+data <- data %>% 
+  dplyr:: mutate_at(col, factor)
+
+```
+
+2. **Apply Imputation Methods**
+   - Select and apply at least three different methods for imputing missing data, such as:
+     - Mean/Median/Mode imputation.
+Lets apply mice function to impute missing data by mean imputation. Here, we have select 1 imputation and 1 iteration.
+```{r}
+set.seed(123)
+data_imp_mean <- mice(data, method = "mean", m = 1, maxit = 1)
+data_mean_c <- complete(data_imp_mean)
+```
+
+     - K-Nearest Neighbors (KNN) imputation.
+
+KNN imputation replaces missing values based on the values of the nearest neighbors.
+
+Implementation:
+```{r}
+set.seed(456)
+imputed_data_KNN <- kNN(data, k = 3)  # k = number of nearest neighbors
+```
+
+- Multiple Imputation by Chained Equations (MICE).
+
+MICE is a robust method for handling missing data by creating multiple imputed datasets and combining the results. Here we consider 5 imputation (according to theory this sould be more thanb 20 ) and 5 number of iteration
+
+```{r}
+imputed_data_mice <- mice(data, m = 5, seed = 567, maxit=5)
+imputed_data_mice_c<-complete(imputed_data_mice)
+```
+   - Document the implementation process for each method.
+
+3. **Evaluation of Imputation Methods**
+First we are going to create a database that included the imputed and non-imputed data 
+```{r}
+data_imp<-imputed_data_mice_c %>%
+  rename_with(~ ifelse(. == "ID", ., paste0(., "_imp")))
+data_imp_mice <- full_join(data_imp, data, by = "ID", suffix = c("", ""))
+```
+
+   - Compare the imputed datasets by analyzing:
+     - Changes in key summary statistics (e.g., means, variances).
+     PM_BMI_SR, PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME , SDC_EB_ABORIGINAL, SDC_AGE_CALC, SDC_GENDER, WRK_EMPLOYMENT, HS_GEN_HEALTH, NUT_VEG_QTY, NUT_FRUITS_QTY, SMK_CIG_STATUS, ALC_CUR_FREQ, DIS_DEP_EVER, DIS_DIAB_TYPE , ADM_STUDY_ID
+```{r}
+
+```
+     
+     - The preservation of relationships between variables (e.g., correlations).
+     - Visual comparisons of distributions before and after imputation.
+4. **Analysis of Imputed Data**
+   - Conduct a simple statistical analysis on the imputed datasets to illustrate the downstream effects of different imputation methods.
+   - Discuss how the choice of imputation method impacts the analysis results.
+
+5. **Interpretation and Reporting**
+   - Provide a detailed comparison of the methods, discussing their strengths, weaknesses, and suitability for the dataset.
+   - Reflect on the challenges of handling missing data in health research.
+
+
+## References
