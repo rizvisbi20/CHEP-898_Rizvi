@@ -78,7 +78,7 @@ let's review filter out all variables with more than 50% missing.
 
 ```{r}
 data <- data %>%
-          select(where(~sum(is.na(.x))/length(.x) < 0.80))
+          select(where(~sum(is.na(.x))/length(.x) < 0.50))
 
 missing_table <- miss_var_summary(data)
 ```
@@ -93,7 +93,7 @@ missing_table
 gg_miss_upset(data, order.by = "freq", nsets = 10)
 ```
 
-Suppose we want to make mode where 
+Suppose we want to make model where 
 We have identified the outcome and predictors variable. Follwoing are the outcoma and predictor variables.
 
 ## Main Outcome of Interest: 
@@ -134,10 +134,6 @@ DE: Depression: DIS_DEP_EVER
 
 DIA: Diabetes: DIS_DIAB_TYPE
 
-
-### Enviromental factor:
-
-
 RE: Region: ADM_STUDY_ID
 ```{r}
 data<- data %>%
@@ -152,14 +148,33 @@ data <- data %>%
 2. **Apply Imputation Methods**
    - Select and apply at least three different methods for imputing missing data, such as:
      - Mean/Median/Mode imputation.
-Lets apply mice function to impute missing data by mean imputation. Here, we have select 1 imputation and 1 iteration.
+We have used mean for continuous variable and median for categorical variables. 
 ```{r}
 set.seed(123)
-data_imp_mean <- mice(data, method = "mean", m = 1, maxit = 1)
-data_mean_c <- complete(data_imp_mean)
-```
+data_mean <- data
+summary(data_mean)
+for(var in names(data_mean)){
+  if (anyNA(data_mean[[var]])) {
+    # print(var)
+    # use median for catagorical variables
+    if (class(data_mean[[var]])=="factor") {
+      # new_var <- paste0(var, "_imput")
+      # data_mean[[new_var]] <- data_mean[[var]]
+      data_mean <- impute_median_at(data_mean, .vars = vars(all_of(var)))
+      # print(var)
+    }
+    #Have use mean for interger or continuous variable
+    else{
+      # new_var <- paste0(var, "_imput")
+      # data_mean[[new_var]] <- data_mean[[var]]
+      data_mean <- impute_mean_at(data_mean, .vars = vars(all_of(var)))
+    }
+    # print(data_shadow[[var]])
+  }
 
-     - K-Nearest Neighbors (KNN) imputation.
+}
+```
+  - K-Nearest Neighbors (KNN) imputation.
 
 KNN imputation replaces missing values based on the values of the nearest neighbors.
 
@@ -180,22 +195,222 @@ imputed_data_mice_c<-complete(imputed_data_mice)
    - Document the implementation process for each method.
 
 3. **Evaluation of Imputation Methods**
-First we are going to create a database that included the imputed and non-imputed data 
-```{r}
-data_imp<-imputed_data_mice_c %>%
-  rename_with(~ ifelse(. == "ID", ., paste0(., "_imp")))
-data_imp_mice <- full_join(data_imp, data, by = "ID", suffix = c("", ""))
-```
-
    - Compare the imputed datasets by analyzing:
      - Changes in key summary statistics (e.g., means, variances).
      PM_BMI_SR, PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME , SDC_EB_ABORIGINAL, SDC_AGE_CALC, SDC_GENDER, WRK_EMPLOYMENT, HS_GEN_HEALTH, NUT_VEG_QTY, NUT_FRUITS_QTY, SMK_CIG_STATUS, ALC_CUR_FREQ, DIS_DEP_EVER, DIS_DIAB_TYPE , ADM_STUDY_ID
 ```{r}
+# Function to calculate mean and standard deviation
+calculate_stats <- function(data) {
+  numeric_stats<-data %>%
+    summarise(across(where(is.numeric), list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE))))
+  freq_tables <- data %>%
+    select(where(is.factor)) %>%
+    map(~ table(.x) %>% as.data.frame() %>% rename(Value = .x, Frequency = Freq))
+  list(
+    numeric_stats = numeric_stats,
+    freq_tables = freq_tables
+  )
+}
 
+# Calculate statistics for each dataset
+
+data_selct <- data %>%
+  select(-c(SDC_GENDER, SDC_AGE_CALC, ADM_STUDY_ID))
+original_stats<-calculate_stats(data)
+data_selct <- data_mean %>%
+  select(-c(SDC_GENDER, SDC_AGE_CALC, ADM_STUDY_ID))
+mean_imputed_stats <- calculate_stats(data_selct)
+data_selct <- imputed_data_KNN %>%
+  select(-c(SDC_GENDER, SDC_AGE_CALC, ADM_STUDY_ID))
+KNN_imputed_stats <- calculate_stats(data_selct)
+data_selct <- imputed_data_mice_c %>%
+  select(-c(SDC_GENDER, SDC_AGE_CALC, ADM_STUDY_ID))
+mice_imputed_stats <- calculate_stats(imputed_data_mice_c)
+
+original_stats_num<-data.frame(original_stats$numeric_stats)
+mean_imputed_stats_num<-data.frame(mean_imputed_stats$numeric_stats)
+KNN_imputed_stats_num<-data.frame(KNN_imputed_stats$numeric_stats)
+mice_imputed_stats_num<-data.frame(mice_imputed_stats$numeric_stats)
+
+original_fre <- original_stats$freq_tables %>%
+  bind_rows(.id = "Variable")
+wide_original_fre <- original_fre %>%
+  pivot_wider(names_from = Variable, values_from = Frequency, values_fill = list(Frequency = 0))
+
+mean_fre <- mean_imputed_stats$freq_tables %>%
+  bind_rows(.id = "Variable")
+wide_mean_fre <- mean_fre %>%
+  pivot_wider(names_from = Variable, values_from = Frequency, values_fill = list(Frequency = 0))
+KNN_fre <- KNN_imputed_stats$freq_tables %>%
+  bind_rows(.id = "Variable")
+wide_KNN_fre <- KNN_fre %>%
+  pivot_wider(names_from = Variable, values_from = Frequency, values_fill = list(Frequency = 0))
+
+mice_fre <- mice_imputed_stats$freq_tables %>%
+  bind_rows(.id = "Variable")
+wide_mice_fre <- mice_fre %>%
+  pivot_wider(names_from = Variable, values_from = Frequency, values_fill = list(Frequency = 0))
+
+
+# Combine results into a single table for comparison
+comparable_fre <- bind_rows(
+  wide_original_fre %>% mutate(Dataset = "Original"),
+  wide_mean_fre %>% mutate(Dataset = "Median Imputed"),
+  wide_KNN_fre %>% mutate(Dataset = "KNN Imputed"),
+  wide_mice_fre %>% mutate(Dataset = "mice Imputed")
+)
+
+comparison_table<- bind_rows(
+  original_stats_num %>% mutate(Dataset = "Original"),
+  mean_imputed_stats_num %>% mutate(Dataset = "Mean Imputed"),
+  KNN_imputed_stats_num %>% mutate(Dataset = "KNN Imputed"),
+  mice_imputed_stats_num %>% mutate(Dataset = "mice Imputed")
+)
+
+comparable_fre %>%
+  select(Value, SDC_EB_ABORIGINAL, Dataset) %>%
+  filter(SDC_EB_ABORIGINAL!=0)
+
+
+# Display the comparison table
+print(comparison_table)
 ```
      
      - The preservation of relationships between variables (e.g., correlations).
-     - Visual comparisons of distributions before and after imputation.
+```{r}
+# Select only numeric variables
+# data_com
+original_cor <- data %>%
+  select(PM_BMI_SR,  PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME) %>%
+  na.omit() %>%
+  cor() 
+
+mean_cor <- data_mean %>%
+  select(PM_BMI_SR,  PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME) %>%
+  cor() 
+KNN_cor <- imputed_data_KNN %>%
+  select(PM_BMI_SR,  PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME) %>%
+  cor() 
+mice_cor <- imputed_data_mice_c %>%
+  select(PM_BMI_SR,  PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME) %>%
+  cor() 
+# Compute the correlation matrix
+print ("Correlation matrix for orginal dataset")
+print (original_cor)
+print ("Correlation matrix for mean imputation")
+print(mean_cor)
+print ("Correlation matrix for KNN imputation")
+print(KNN_cor)
+print ("Correlation matrix for MICE imputation" )
+print(mice_cor)
+
+
+
+```
+Cross tabulation for catagorical variables 
+
+```{r}
+library(gmodels)
+var_names<-data %>%
+  select(where(is.factor)) %>%
+  names()
+# variable_pairs <- combn(var_names, 2, simplify = FALSE)
+# 
+# # Create an empty list to store cross-tabulations
+# cross_tabs <- list()
+# 
+# # Loop through each pair and generate cross-tabulations
+# for (pair in variable_pairs) {
+#   var1 <- pair[1]
+#   var2 <- pair[2]
+#   cross_tab <- table(data_shadow[[var1]], data_shadow[[var2]])
+#   cross_tabs[[paste(var1, "vs", var2)]] <- cross_tab
+# }
+# 
+# # Display all cross-tabulations
+# print(cross_tabs)
+
+
+for (i in 1:(length(var_names)-1)) {
+  for (j in (i+1):length(var_names)) {
+    cat("\nCross-tabulation between", var_names[i], "and", var_names[j], "\n", "For Orginal data")
+    CrossTable(data[[var_names[i]]], data[[var_names[j]]], prop.chisq  = FALSE, prop.r = TRUE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE)
+    cat("\nCross-tabulation between", var_names[i], "and", var_names[j], "\n", "For Median Imputation")
+    CrossTable(data_mean[[var_names[i]]], data_mean[[var_names[j]]], prop.chisq  = FALSE, prop.r = TRUE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE)
+    cat("\nCross-tabulation between", var_names[i], "and", var_names[j], "\n", "For KNN Imputation")
+    CrossTable(imputed_data_KNN[[var_names[i]]], imputed_data_KNN[[var_names[j]]], prop.chisq  = FALSE, prop.r = TRUE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE)
+    cat("\nCross-tabulation between", var_names[i], "and", var_names[j], "\n", "For MICE Imputation")
+    CrossTable(imputed_data_mice_c[[var_names[i]]], imputed_data_mice_c[[var_names[j]]], prop.chisq  = FALSE, prop.r = TRUE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE)
+  }
+}
+
+```
+- Visual comparisons of distributions before and after imputation.
+
+```{r}
+# variables<-data %>%
+#   select(where(is.numeric)) %>%
+#   names()
+# variables<-c("PM_BMI_SR",  "PA_TOTAL_SHORT" , "PA_TOTAL_SIT_TIME" )
+  # Load the ggplot2 package
+
+# Loop through each variable
+
+#  data <- data %>%
+#   rename_with(~ paste0(. , "_ori"), -ID)
+#  data_mean <- data_mean %>%
+#   rename_with(~ paste0(. , "_mean"), -ID)
+#  imputed_data_KNN <- imputed_data_KNN %>%
+#   rename_with(~ paste0(. , "_KNN"), -ID)
+#  imputed_data_mice_c <- imputed_data_mice_c %>%
+#   rename_with(~ paste0(. , "_mice"), -ID)
+# 
+# # Load the ggplot2 package
+# library(ggplot2)
+
+# List of variables to plot
+# variables <- c("PA_TOTAL_SHORT", "SDC_GENDER")
+
+# Loop through each variable
+# combined_data <- data %>%
+#   full_join(data_mean, by = "ID") %>%
+#   full_join(imputed_data_KNN, by = "ID") %>%
+#   full_join(imputed_data_mice_c, by = "ID")
+# for (var in variables) {
+#   # Create the density plot
+#   density_imp <- ggplot(combined_data) +
+#     geom_density(aes(x = .data[[paste0(var, "_ogi")]], colour = "Original")) +
+#     geom_density(aes(x = .data[[paste0(var, "_mean")]], colour = "Mean Imputation")) +
+#     geom_density(aes(x = .data[[paste0(var, "_KNN")]], colour = "KNN Imputation")) +
+#     geom_density(aes(x = .data[[paste0(var, "_mice")]], colour = "MICE Imputation")) +
+#     labs(
+#       title = paste("Density Plot for", var),
+#       x = var,
+#       y = "Density",
+#       colour = "Imputation Method"
+#     ) +
+#     theme_minimal()
+#   
+#   # Display the plot
+#   print(density_imp)
+# }
+# density_imp <- ggplot(combined_data) +
+#                 geom_density(aes(PA_TOTAL_SHORT_ogi, colour= "Original")) +
+#                 geom_density(aes(PA_TOTAL_SHORT_mean, colour= "Mean Imputation")) +
+#                 geom_density(aes(PA_TOTAL_SHORT_KNN, colour= "KNN Imputation")) +
+#                 geom_density(aes(PA_TOTAL_SHORT_mice, colour= "MICE Imputation"))
+# plot(density_imp)
+# 
+# density_imp <- ggplot(combined_data) +
+#                 geom_density(aes(SDC_GENDER_ogi, colour= "Original")) +
+#                 geom_density(aes(SDC_GENDER_mean, colour= "Mean Imputation")) +
+#                 geom_density(aes(SDC_GENDER_KNN, colour= "KNN Imputation")) +
+#                 geom_density(aes(SDC_GENDER_mice, colour= "MICE Imputation"))
+# plot(density_imp)
+
+```
+
+  
 4. **Analysis of Imputed Data**
    - Conduct a simple statistical analysis on the imputed datasets to illustrate the downstream effects of different imputation methods.
    - Discuss how the choice of imputation method impacts the analysis results.
