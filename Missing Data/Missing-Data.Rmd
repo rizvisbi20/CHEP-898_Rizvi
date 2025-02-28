@@ -351,19 +351,19 @@ for (i in 1:(length(var_names)-1)) {
 # variables<-data %>%
 #   select(where(is.numeric)) %>%
 #   names()
-# variables<-c("PM_BMI_SR",  "PA_TOTAL_SHORT" , "PA_TOTAL_SIT_TIME" )
+variables<-c("PM_BMI_SR",  "PA_TOTAL_SHORT" , "PA_TOTAL_SIT_TIME" )
   # Load the ggplot2 package
 
 # Loop through each variable
 
-#  data <- data %>%
-#   rename_with(~ paste0(. , "_ori"), -ID)
-#  data_mean <- data_mean %>%
-#   rename_with(~ paste0(. , "_mean"), -ID)
-#  imputed_data_KNN <- imputed_data_KNN %>%
-#   rename_with(~ paste0(. , "_KNN"), -ID)
-#  imputed_data_mice_c <- imputed_data_mice_c %>%
-#   rename_with(~ paste0(. , "_mice"), -ID)
+ data_rename <- data %>%
+  rename_with(~ paste0(. , "_ori"), -ID)
+ data_mean_rename <- data_mean %>%
+  rename_with(~ paste0(. , "_mean"), -ID)
+ imputed_data_KNN_rename <- imputed_data_KNN %>%
+  rename_with(~ paste0(. , "_KNN"), -ID)
+ imputed_data_mice_c_rename <- imputed_data_mice_c %>%
+  rename_with(~ paste0(. , "_mice"), -ID)
 # 
 # # Load the ggplot2 package
 # library(ggplot2)
@@ -372,52 +372,212 @@ for (i in 1:(length(var_names)-1)) {
 # variables <- c("PA_TOTAL_SHORT", "SDC_GENDER")
 
 # Loop through each variable
-# combined_data <- data %>%
-#   full_join(data_mean, by = "ID") %>%
-#   full_join(imputed_data_KNN, by = "ID") %>%
-#   full_join(imputed_data_mice_c, by = "ID")
+combined_data <- data_rename %>%
+  full_join(data_mean_rename, by = "ID") %>%
+  full_join(imputed_data_KNN_rename, by = "ID") %>%
+  full_join(imputed_data_mice_c_rename, by = "ID")
 # for (var in variables) {
 #   # Create the density plot
 #   density_imp <- ggplot(combined_data) +
-#     geom_density(aes(x = .data[[paste0(var, "_ogi")]], colour = "Original")) +
-#     geom_density(aes(x = .data[[paste0(var, "_mean")]], colour = "Mean Imputation")) +
-#     geom_density(aes(x = .data[[paste0(var, "_KNN")]], colour = "KNN Imputation")) +
-#     geom_density(aes(x = .data[[paste0(var, "_mice")]], colour = "MICE Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_ori")]], colour = "Original")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_mean")]], colour = "Mean Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_KNN")]], colour = "KNN Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_mice")]], colour = "MICE Imputation")) +
 #     labs(
 #       title = paste("Density Plot for", var),
 #       x = var,
 #       y = "Density",
 #       colour = "Imputation Method"
-#     ) +
-#     theme_minimal()
-#   
+#     ) 
+# 
 #   # Display the plot
 #   print(density_imp)
 # }
-# density_imp <- ggplot(combined_data) +
-#                 geom_density(aes(PA_TOTAL_SHORT_ogi, colour= "Original")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_mean, colour= "Mean Imputation")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_KNN, colour= "KNN Imputation")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_mice, colour= "MICE Imputation"))
-# plot(density_imp)
-# 
-# density_imp <- ggplot(combined_data) +
-#                 geom_density(aes(SDC_GENDER_ogi, colour= "Original")) +
-#                 geom_density(aes(SDC_GENDER_mean, colour= "Mean Imputation")) +
-#                 geom_density(aes(SDC_GENDER_KNN, colour= "KNN Imputation")) +
-#                 geom_density(aes(SDC_GENDER_mice, colour= "MICE Imputation"))
-# plot(density_imp)
 
+density_bmi <- ggplot(combined_data) +
+                geom_density(aes(PM_BMI_SR_ori, colour= "Original")) +
+                geom_density(aes(PM_BMI_SR_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PM_BMI_SR_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PM_BMI_SR_mice, colour= "MICE Imputation"))+
+  labs(
+    title = "Density Plot for BMI",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "BMI",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+        
+plot(density_bmi)
+
+density_short <- ggplot(combined_data) +
+                geom_density(aes(PA_TOTAL_SHORT_ori, colour= "Original")) +
+                geom_density(aes(PA_TOTAL_SHORT_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PA_TOTAL_SHORT_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PA_TOTAL_SHORT_mice, colour= "MICE Imputation"))+
+    labs(
+    title = "Density Plot for Physical Activity",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "Physical Activity",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+plot(density_short)
+
+density_sit <- ggplot(combined_data) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_ori, colour= "Original")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_mice, colour= "MICE Imputation")) +
+      labs(
+    title = "Density Plot for sitting time",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "Sitting time",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+plot(density_sit)
 ```
 
   
 4. **Analysis of Imputed Data**
    - Conduct a simple statistical analysis on the imputed datasets to illustrate the downstream effects of different imputation methods.
+```{r}
+data_ori<-data %>%
+  mutate(source="Original")
+data_mean_source<-data_mean %>%
+  mutate(source="Meean")
+imputed_data_KNN_source<-imputed_data_KNN%>%
+  select(-c(ID_imp , PM_BMI_SR_imp, PA_TOTAL_SHORT_imp, PA_TOTAL_SIT_TIME_imp, SDC_EB_ABORIGINAL_imp, SDC_AGE_CALC_imp, SDC_GENDER_imp, WRK_EMPLOYMENT_imp, HS_GEN_HEALTH_imp, NUT_VEG_QTY_imp, NUT_FRUITS_QTY_imp, SMK_CIG_STATUS_imp, ALC_CUR_FREQ_imp, DIS_DEP_EVER_imp, DIS_DIAB_TYPE_imp, ADM_STUDY_ID_imp)) %>%
+  mutate(source="KNN")
+imputed_data_mice_c_source<-imputed_data_mice_c %>%
+  mutate(source="MICE")
+combine_long<-rbind(data_ori,data_mean_source, imputed_data_KNN_source, imputed_data_mice_c_source )
+```
+```{r}
+median_table <- combine_long %>%
+   group_by(source) %>%
+   summarize(
+    BMI = median(PM_BMI_SR, na.rm = TRUE),
+    SHORT = mean(PA_TOTAL_SHORT, na.rm = TRUE),
+    sit_time = median(PA_TOTAL_SIT_TIME, na.rm = TRUE)
+  )
+print(median_table)
+```
+
+   
    - Discuss how the choice of imputation method impacts the analysis results.
+```{r}
+ library(broom)
+ model_original <- data %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+summary(model_original)
+  model_mean <- data_mean %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+ summary(model_mean)
+ 
+model_KNN <- imputed_data_KNN %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+#model for KNNN imputation
+ summary(model_KNN)
+ 
+ model_mice <- imputed_data_mice_c %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+#model for KNNN imputation
+ summary(model_mice)
+```
+   
 
 5. **Interpretation and Reporting**
    - Provide a detailed comparison of the methods, discussing their strengths, weaknesses, and suitability for the dataset.
+   # Mean/Median/Mode Imputation
+
+Method: Replace missing values with the mean, median, or mode of the observed data.
+Impact:
+Advantages:
+Simple and easy to implement.
+Preserves the sample size.
+Disadvantages:
+Reduces variability in the data, leading to underestimation of variance.
+Can distort relationships between variables (e.g., correlations, regression coefficients).
+Ignores the uncertainty of the imputed values.
+Use Case: Suitable for preliminary analysis or when the proportion of missing data is very small.
+
+# k-Nearest Neighbors (KNN) Imputation
+
+Method: Replace missing values with the average (or weighted average) of the k-nearest neighbors in the feature space.
+Advantages:
+Captures local patterns in the data.
+Preserves relationships between variables better than mean imputation.
+Disadvantages:
+Computationally expensive for large datasets.
+Sensitive to the choice of k and the distance metric.
+May introduce bias if the data has a complex structure.
+Use Case: Useful for datasets with complex relationships and moderate missingness.
+
+# Multiple Imputation by Chained Equations (MICE)
+
+Method: Generate multiple imputed datasets by modeling each variable with missing data conditional on other variables.
+Impact:
+Advantages:
+Accounts for uncertainty in the imputed values by generating multiple datasets.
+Preserves relationships between variables and the variability of the data.
+Flexible and can handle different types of variables (continuous, categorical).
+Disadvantages:
+Computationally intensive.
+Requires careful specification of the imputation model.
+Use Case: Ideal for datasets with complex missing data mechanisms and when unbiased estimates of uncertainty are needed.
+
    - Reflect on the challenges of handling missing data in health research.
 
+Bias: The analysis may produce biased estimates if missingness is not random (MAR or MNAR).
+Reduced Statistical Power: Missing data reduces the adequate sample size, leading to less precise estimates and lower power to detect significant effects.
+Loss of Generalizability: If the missing data pattern is related to specific subgroups, the results may not be generalizable to the entire population.
+Challenge: Ensuring that the analysis remains valid and generalizable despite missing data.
 
 ## References

@@ -6881,19 +6881,19 @@ for (i in 1:(length(var_names)-1)) {
 # variables<-data %>%
 #   select(where(is.numeric)) %>%
 #   names()
-# variables<-c("PM_BMI_SR",  "PA_TOTAL_SHORT" , "PA_TOTAL_SIT_TIME" )
+variables<-c("PM_BMI_SR",  "PA_TOTAL_SHORT" , "PA_TOTAL_SIT_TIME" )
   # Load the ggplot2 package
 
 # Loop through each variable
 
-#  data <- data %>%
-#   rename_with(~ paste0(. , "_ori"), -ID)
-#  data_mean <- data_mean %>%
-#   rename_with(~ paste0(. , "_mean"), -ID)
-#  imputed_data_KNN <- imputed_data_KNN %>%
-#   rename_with(~ paste0(. , "_KNN"), -ID)
-#  imputed_data_mice_c <- imputed_data_mice_c %>%
-#   rename_with(~ paste0(. , "_mice"), -ID)
+ data_rename <- data %>%
+  rename_with(~ paste0(. , "_ori"), -ID)
+ data_mean_rename <- data_mean %>%
+  rename_with(~ paste0(. , "_mean"), -ID)
+ imputed_data_KNN_rename <- imputed_data_KNN %>%
+  rename_with(~ paste0(. , "_KNN"), -ID)
+ imputed_data_mice_c_rename <- imputed_data_mice_c %>%
+  rename_with(~ paste0(. , "_mice"), -ID)
 # 
 # # Load the ggplot2 package
 # library(ggplot2)
@@ -6902,51 +6902,474 @@ for (i in 1:(length(var_names)-1)) {
 # variables <- c("PA_TOTAL_SHORT", "SDC_GENDER")
 
 # Loop through each variable
-# combined_data <- data %>%
-#   full_join(data_mean, by = "ID") %>%
-#   full_join(imputed_data_KNN, by = "ID") %>%
-#   full_join(imputed_data_mice_c, by = "ID")
+combined_data <- data_rename %>%
+  full_join(data_mean_rename, by = "ID") %>%
+  full_join(imputed_data_KNN_rename, by = "ID") %>%
+  full_join(imputed_data_mice_c_rename, by = "ID")
 # for (var in variables) {
 #   # Create the density plot
 #   density_imp <- ggplot(combined_data) +
-#     geom_density(aes(x = .data[[paste0(var, "_ogi")]], colour = "Original")) +
-#     geom_density(aes(x = .data[[paste0(var, "_mean")]], colour = "Mean Imputation")) +
-#     geom_density(aes(x = .data[[paste0(var, "_KNN")]], colour = "KNN Imputation")) +
-#     geom_density(aes(x = .data[[paste0(var, "_mice")]], colour = "MICE Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_ori")]], colour = "Original")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_mean")]], colour = "Mean Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_KNN")]], colour = "KNN Imputation")) +
+#     geom_density(aes(x = .combined_data[[paste0(var, "_mice")]], colour = "MICE Imputation")) +
 #     labs(
 #       title = paste("Density Plot for", var),
 #       x = var,
 #       y = "Density",
 #       colour = "Imputation Method"
-#     ) +
-#     theme_minimal()
-#   
+#     ) 
+# 
 #   # Display the plot
 #   print(density_imp)
 # }
-# density_imp <- ggplot(combined_data) +
-#                 geom_density(aes(PA_TOTAL_SHORT_ogi, colour= "Original")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_mean, colour= "Mean Imputation")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_KNN, colour= "KNN Imputation")) +
-#                 geom_density(aes(PA_TOTAL_SHORT_mice, colour= "MICE Imputation"))
-# plot(density_imp)
-# 
-# density_imp <- ggplot(combined_data) +
-#                 geom_density(aes(SDC_GENDER_ogi, colour= "Original")) +
-#                 geom_density(aes(SDC_GENDER_mean, colour= "Mean Imputation")) +
-#                 geom_density(aes(SDC_GENDER_KNN, colour= "KNN Imputation")) +
-#                 geom_density(aes(SDC_GENDER_mice, colour= "MICE Imputation"))
-# plot(density_imp)
+
+density_bmi <- ggplot(combined_data) +
+                geom_density(aes(PM_BMI_SR_ori, colour= "Original")) +
+                geom_density(aes(PM_BMI_SR_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PM_BMI_SR_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PM_BMI_SR_mice, colour= "MICE Imputation"))+
+  labs(
+    title = "Density Plot for BMI",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "BMI",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+        
+plot(density_bmi)
 ```
+
+```
+## Warning: Removed 11976 rows containing non-finite outside the scale range
+## (`stat_density()`).
+```
+
+![](Missing-Data_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+density_short <- ggplot(combined_data) +
+                geom_density(aes(PA_TOTAL_SHORT_ori, colour= "Original")) +
+                geom_density(aes(PA_TOTAL_SHORT_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PA_TOTAL_SHORT_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PA_TOTAL_SHORT_mice, colour= "MICE Imputation"))+
+    labs(
+    title = "Density Plot for Physical Activity",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "Physical Activity",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+plot(density_short)
+```
+
+```
+## Warning: Removed 6763 rows containing non-finite outside the scale range
+## (`stat_density()`).
+```
+
+![](Missing-Data_files/figure-html/unnamed-chunk-16-2.png)<!-- -->
+
+``` r
+density_sit <- ggplot(combined_data) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_ori, colour= "Original")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_mean, colour= "Mean Imputation")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_KNN, colour= "KNN Imputation")) +
+                geom_density(aes(PA_TOTAL_SIT_TIME_mice, colour= "MICE Imputation")) +
+      labs(
+    title = "Density Plot for sitting time",  # Dynamic title using the variable name
+    # subtitle = "Comparison of Imputation Methods",  # Optional subtitle
+    # caption = "Data source: Your Dataset",  # Optional caption
+    x = "Sitting time",  # X-axis label
+    y = "Density",  # Y-axis label
+    colour = "Imputation Method"  # Legend title
+  )+
+  theme(
+  plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  # Center and bold the title
+  plot.subtitle = element_text(size = 12, hjust = 0.5),  # Center the subtitle
+  plot.caption = element_text(size = 10, face = "italic")  # Italicize the caption
+)
+plot(density_sit)
+```
+
+```
+## Warning: Removed 11272 rows containing non-finite outside the scale range
+## (`stat_density()`).
+```
+
+![](Missing-Data_files/figure-html/unnamed-chunk-16-3.png)<!-- -->
 
   
 4. **Analysis of Imputed Data**
    - Conduct a simple statistical analysis on the imputed datasets to illustrate the downstream effects of different imputation methods.
+
+``` r
+data_ori<-data %>%
+  mutate(source="Original")
+data_mean_source<-data_mean %>%
+  mutate(source="Meean")
+imputed_data_KNN_source<-imputed_data_KNN%>%
+  select(-c(ID_imp , PM_BMI_SR_imp, PA_TOTAL_SHORT_imp, PA_TOTAL_SIT_TIME_imp, SDC_EB_ABORIGINAL_imp, SDC_AGE_CALC_imp, SDC_GENDER_imp, WRK_EMPLOYMENT_imp, HS_GEN_HEALTH_imp, NUT_VEG_QTY_imp, NUT_FRUITS_QTY_imp, SMK_CIG_STATUS_imp, ALC_CUR_FREQ_imp, DIS_DEP_EVER_imp, DIS_DIAB_TYPE_imp, ADM_STUDY_ID_imp)) %>%
+  mutate(source="KNN")
+imputed_data_mice_c_source<-imputed_data_mice_c %>%
+  mutate(source="MICE")
+combine_long<-rbind(data_ori,data_mean_source, imputed_data_KNN_source, imputed_data_mice_c_source )
+```
+
+``` r
+median_table <- combine_long %>%
+   group_by(source) %>%
+   summarize(
+    BMI = median(PM_BMI_SR, na.rm = TRUE),
+    SHORT = mean(PA_TOTAL_SHORT, na.rm = TRUE),
+    sit_time = median(PA_TOTAL_SIT_TIME, na.rm = TRUE)
+  )
+print(median_table)
+```
+
+```
+## # A tibble: 4 × 4
+##   source     BMI SHORT sit_time
+##   <chr>    <dbl> <dbl>    <dbl>
+## 1 KNN       26.6 2479.    2520 
+## 2 MICE      26.6 2588.    2520 
+## 3 Meean     27.5 2574.    2661.
+## 4 Original  26.6 2574.    2520
+```
+
+   
    - Discuss how the choice of imputation method impacts the analysis results.
+
+``` r
+ library(broom)
+ model_original <- data %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+summary(model_original)
+```
+
+```
+## 
+## Call:
+## lm(formula = PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT + PA_TOTAL_SIT_TIME + 
+##     SDC_EB_ABORIGINAL + SDC_AGE_CALC + SDC_GENDER + WRK_EMPLOYMENT + 
+##     HS_GEN_HEALTH + NUT_VEG_QTY + NUT_FRUITS_QTY + SMK_CIG_STATUS + 
+##     ALC_CUR_FREQ + DIS_DEP_EVER + DIS_DIAB_TYPE + ADM_STUDY_ID)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -20.415  -3.685  -0.764   2.735  39.744 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)         2.739e+01  5.115e-01  53.556  < 2e-16 ***
+## PA_TOTAL_SHORT     -1.028e-04  1.691e-05  -6.077 1.25e-09 ***
+## PA_TOTAL_SIT_TIME   1.756e-04  3.650e-05   4.811 1.51e-06 ***
+## SDC_EB_ABORIGINAL1  4.410e-01  2.300e-01   1.917 0.055192 .  
+## SDC_AGE_CALC        3.431e-02  4.436e-03   7.734 1.09e-14 ***
+## SDC_GENDER2        -1.214e+00  8.885e-02 -13.663  < 2e-16 ***
+## WRK_EMPLOYMENT1     1.948e-02  1.023e-01   0.190 0.848981    
+## HS_GEN_HEALTH2      1.825e-01  3.694e-01   0.494 0.621381    
+## HS_GEN_HEALTH3     -9.134e-01  3.459e-01  -2.640 0.008287 ** 
+## HS_GEN_HEALTH4     -3.066e+00  3.459e-01  -8.863  < 2e-16 ***
+## HS_GEN_HEALTH5     -3.874e+00  3.559e-01 -10.886  < 2e-16 ***
+## NUT_VEG_QTY         1.075e-02  2.958e-02   0.364 0.716225    
+## NUT_FRUITS_QTY     -6.525e-02  3.467e-02  -1.882 0.059848 .  
+## SMK_CIG_STATUS1     3.433e-01  9.244e-02   3.714 0.000205 ***
+## SMK_CIG_STATUS2     7.677e-01  2.711e-01   2.832 0.004634 ** 
+## SMK_CIG_STATUS3     2.488e-01  1.688e-01   1.474 0.140400    
+## ALC_CUR_FREQ0       4.072e-01  2.531e-01   1.609 0.107708    
+## ALC_CUR_FREQ1       1.616e-01  2.153e-01   0.751 0.452805    
+## ALC_CUR_FREQ2       2.668e-01  2.415e-01   1.105 0.269231    
+## ALC_CUR_FREQ3       1.563e-01  2.233e-01   0.700 0.483945    
+## ALC_CUR_FREQ4      -5.889e-01  2.273e-01  -2.591 0.009589 ** 
+## ALC_CUR_FREQ5      -2.988e-01  2.137e-01  -1.398 0.162192    
+## ALC_CUR_FREQ6      -5.661e-01  2.305e-01  -2.456 0.014067 *  
+## ALC_CUR_FREQ7      -4.715e-01  2.315e-01  -2.037 0.041662 *  
+## DIS_DEP_EVER1       2.395e-01  1.378e-01   1.738 0.082200 .  
+## DIS_DEP_EVER2       7.387e-01  5.110e-01   1.446 0.148307    
+## DIS_DIAB_TYPE1      6.261e-01  5.107e-01   1.226 0.220219    
+## DIS_DIAB_TYPE2      1.270e+00  1.997e-01   6.362 2.03e-10 ***
+## DIS_DIAB_TYPE3      1.679e+00  4.442e-01   3.781 0.000157 ***
+## ADM_STUDY_ID2       1.966e+00  1.617e-01  12.157  < 2e-16 ***
+## ADM_STUDY_ID3       7.469e-01  1.366e-01   5.469 4.58e-08 ***
+## ADM_STUDY_ID5       2.826e+00  2.030e-01  13.921  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.684 on 18666 degrees of freedom
+##   (22489 observations deleted due to missingness)
+## Multiple R-squared:  0.1024,	Adjusted R-squared:  0.1009 
+## F-statistic: 68.67 on 31 and 18666 DF,  p-value: < 2.2e-16
+```
+
+``` r
+  model_mean <- data_mean %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+ summary(model_mean)
+```
+
+```
+## 
+## Call:
+## lm(formula = PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT + PA_TOTAL_SIT_TIME + 
+##     SDC_EB_ABORIGINAL + SDC_AGE_CALC + SDC_GENDER + WRK_EMPLOYMENT + 
+##     HS_GEN_HEALTH + NUT_VEG_QTY + NUT_FRUITS_QTY + SMK_CIG_STATUS + 
+##     ALC_CUR_FREQ + DIS_DEP_EVER + DIS_DIAB_TYPE + ADM_STUDY_ID)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -19.432  -2.744  -0.363   1.703  40.735 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)         2.816e+01  2.872e-01  98.077  < 2e-16 ***
+## PA_TOTAL_SHORT     -7.199e-05  1.065e-05  -6.759 1.41e-11 ***
+## PA_TOTAL_SIT_TIME   1.261e-04  2.481e-05   5.080 3.80e-07 ***
+## SDC_EB_ABORIGINAL1  2.843e-01  1.353e-01   2.101 0.035668 *  
+## SDC_AGE_CALC        2.173e-02  2.565e-03   8.468  < 2e-16 ***
+## SDC_GENDER2        -8.850e-01  5.364e-02 -16.499  < 2e-16 ***
+## WRK_EMPLOYMENT1    -1.221e-02  5.896e-02  -0.207 0.835958    
+## HS_GEN_HEALTH2     -2.515e-01  1.968e-01  -1.278 0.201400    
+## HS_GEN_HEALTH3     -9.802e-01  1.834e-01  -5.345 9.07e-08 ***
+## HS_GEN_HEALTH4     -2.522e+00  1.833e-01 -13.761  < 2e-16 ***
+## HS_GEN_HEALTH5     -3.038e+00  1.901e-01 -15.985  < 2e-16 ***
+## NUT_VEG_QTY         1.806e-02  1.729e-02   1.045 0.296172    
+## NUT_FRUITS_QTY     -5.177e-02  2.026e-02  -2.555 0.010612 *  
+## SMK_CIG_STATUS1     2.328e-01  5.560e-02   4.186 2.84e-05 ***
+## SMK_CIG_STATUS2     3.144e-01  1.630e-01   1.929 0.053771 .  
+## SMK_CIG_STATUS3     2.049e-02  9.312e-02   0.220 0.825810    
+## ALC_CUR_FREQ0       2.751e-01  1.436e-01   1.916 0.055425 .  
+## ALC_CUR_FREQ1       1.308e-01  1.171e-01   1.117 0.264102    
+## ALC_CUR_FREQ2       1.445e-01  1.387e-01   1.042 0.297472    
+## ALC_CUR_FREQ3       4.597e-03  1.271e-01   0.036 0.971141    
+## ALC_CUR_FREQ4      -4.623e-01  1.298e-01  -3.563 0.000367 ***
+## ALC_CUR_FREQ5      -3.469e-01  1.210e-01  -2.868 0.004135 ** 
+## ALC_CUR_FREQ6      -3.818e-01  1.315e-01  -2.903 0.003701 ** 
+## ALC_CUR_FREQ7      -2.629e-01  1.331e-01  -1.975 0.048292 *  
+## DIS_DEP_EVER1       1.065e-01  8.036e-02   1.325 0.185251    
+## DIS_DEP_EVER2       3.920e-01  2.490e-01   1.575 0.115378    
+## DIS_DIAB_TYPE1      8.212e-01  2.837e-01   2.895 0.003800 ** 
+## DIS_DIAB_TYPE2      1.013e+00  1.136e-01   8.921  < 2e-16 ***
+## DIS_DIAB_TYPE3      1.074e+00  2.451e-01   4.382 1.18e-05 ***
+## ADM_STUDY_ID2       1.221e+00  9.969e-02  12.244  < 2e-16 ***
+## ADM_STUDY_ID3       3.109e-01  8.384e-02   3.708 0.000209 ***
+## ADM_STUDY_ID5       1.700e+00  1.031e-01  16.490  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.002 on 41155 degrees of freedom
+## Multiple R-squared:  0.06947,	Adjusted R-squared:  0.06877 
+## F-statistic: 99.12 on 31 and 41155 DF,  p-value: < 2.2e-16
+```
+
+``` r
+model_KNN <- imputed_data_KNN %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+#model for KNNN imputation
+ summary(model_KNN)
+```
+
+```
+## 
+## Call:
+## lm(formula = PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT + PA_TOTAL_SIT_TIME + 
+##     SDC_EB_ABORIGINAL + SDC_AGE_CALC + SDC_GENDER + WRK_EMPLOYMENT + 
+##     HS_GEN_HEALTH + NUT_VEG_QTY + NUT_FRUITS_QTY + SMK_CIG_STATUS + 
+##     ALC_CUR_FREQ + DIS_DEP_EVER + DIS_DIAB_TYPE + ADM_STUDY_ID)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -19.949  -3.513  -0.710   2.667  41.391 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)         2.816e+01  3.110e-01  90.544  < 2e-16 ***
+## PA_TOTAL_SHORT     -8.685e-05  1.127e-05  -7.705 1.34e-14 ***
+## PA_TOTAL_SIT_TIME   1.301e-04  2.505e-05   5.194 2.07e-07 ***
+## SDC_EB_ABORIGINAL1  2.568e-01  1.417e-01   1.813 0.069870 .  
+## SDC_AGE_CALC        2.806e-02  2.829e-03   9.916  < 2e-16 ***
+## SDC_GENDER2        -1.111e+00  5.933e-02 -18.719  < 2e-16 ***
+## WRK_EMPLOYMENT1    -6.744e-02  6.402e-02  -1.053 0.292129    
+## HS_GEN_HEALTH2     -4.274e-02  2.147e-01  -0.199 0.842239    
+## HS_GEN_HEALTH3     -8.354e-01  2.002e-01  -4.173 3.02e-05 ***
+## HS_GEN_HEALTH4     -2.885e+00  2.006e-01 -14.380  < 2e-16 ***
+## HS_GEN_HEALTH5     -3.628e+00  2.078e-01 -17.457  < 2e-16 ***
+## NUT_VEG_QTY         3.273e-02  1.884e-02   1.737 0.082365 .  
+## NUT_FRUITS_QTY     -9.409e-03  2.185e-02  -0.431 0.666743    
+## SMK_CIG_STATUS1     3.362e-01  6.055e-02   5.553 2.83e-08 ***
+## SMK_CIG_STATUS2     3.271e-01  1.771e-01   1.847 0.064779 .  
+## SMK_CIG_STATUS3     3.464e-02  1.011e-01   0.343 0.731955    
+## ALC_CUR_FREQ0       2.832e-01  1.526e-01   1.856 0.063478 .  
+## ALC_CUR_FREQ1       1.330e-01  1.271e-01   1.046 0.295420    
+## ALC_CUR_FREQ2       3.123e-01  1.473e-01   2.119 0.034074 *  
+## ALC_CUR_FREQ3       4.205e-02  1.348e-01   0.312 0.755126    
+## ALC_CUR_FREQ4      -5.670e-01  1.382e-01  -4.103 4.08e-05 ***
+## ALC_CUR_FREQ5      -5.587e-01  1.283e-01  -4.355 1.34e-05 ***
+## ALC_CUR_FREQ6      -4.983e-01  1.398e-01  -3.564 0.000366 ***
+## ALC_CUR_FREQ7      -4.600e-01  1.416e-01  -3.248 0.001162 ** 
+## DIS_DEP_EVER1       1.360e-01  8.582e-02   1.585 0.113033    
+## DIS_DEP_EVER2       9.404e-02  2.475e-01   0.380 0.704002    
+## DIS_DIAB_TYPE1      8.470e-01  3.116e-01   2.719 0.006559 ** 
+## DIS_DIAB_TYPE2      1.128e+00  1.238e-01   9.114  < 2e-16 ***
+## DIS_DIAB_TYPE3      1.666e+00  2.684e-01   6.206 5.49e-10 ***
+## ADM_STUDY_ID2       1.524e+00  1.097e-01  13.893  < 2e-16 ***
+## ADM_STUDY_ID3      -6.900e-02  9.241e-02  -0.747 0.455260    
+## ADM_STUDY_ID5       2.385e+00  1.136e-01  20.998  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.51 on 41155 degrees of freedom
+## Multiple R-squared:  0.1003,	Adjusted R-squared:  0.0996 
+## F-statistic:   148 on 31 and 41155 DF,  p-value: < 2.2e-16
+```
+
+``` r
+ model_mice <- imputed_data_mice_c %>% 
+   with(lm(PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT +
+                  PA_TOTAL_SIT_TIME + SDC_EB_ABORIGINAL +
+                  SDC_AGE_CALC + SDC_GENDER+ 
+                  WRK_EMPLOYMENT + HS_GEN_HEALTH +
+                  NUT_VEG_QTY + NUT_FRUITS_QTY +
+                  SMK_CIG_STATUS + ALC_CUR_FREQ +
+                  DIS_DEP_EVER + DIS_DIAB_TYPE +
+                  ADM_STUDY_ID))
+#model for KNNN imputation
+ summary(model_mice)
+```
+
+```
+## 
+## Call:
+## lm(formula = PM_BMI_SR ~ PA_TOTAL_SHORT + PA_TOTAL_SHORT + PA_TOTAL_SIT_TIME + 
+##     SDC_EB_ABORIGINAL + SDC_AGE_CALC + SDC_GENDER + WRK_EMPLOYMENT + 
+##     HS_GEN_HEALTH + NUT_VEG_QTY + NUT_FRUITS_QTY + SMK_CIG_STATUS + 
+##     ALC_CUR_FREQ + DIS_DEP_EVER + DIS_DIAB_TYPE + ADM_STUDY_ID)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -21.174  -3.782  -0.810   2.833  41.317 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)         2.825e+01  3.331e-01  84.824  < 2e-16 ***
+## PA_TOTAL_SHORT     -8.629e-05  1.152e-05  -7.489 7.10e-14 ***
+## PA_TOTAL_SIT_TIME   1.355e-04  2.499e-05   5.422 5.94e-08 ***
+## SDC_EB_ABORIGINAL1  5.612e-01  1.512e-01   3.712 0.000206 ***
+## SDC_AGE_CALC        3.221e-02  3.030e-03  10.629  < 2e-16 ***
+## SDC_GENDER2        -1.209e+00  6.314e-02 -19.154  < 2e-16 ***
+## WRK_EMPLOYMENT1    -4.064e-02  6.849e-02  -0.593 0.552949    
+## HS_GEN_HEALTH2     -4.471e-01  2.279e-01  -1.961 0.049830 *  
+## HS_GEN_HEALTH3     -1.468e+00  2.128e-01  -6.898 5.34e-12 ***
+## HS_GEN_HEALTH4     -3.592e+00  2.132e-01 -16.844  < 2e-16 ***
+## HS_GEN_HEALTH5     -4.355e+00  2.209e-01 -19.713  < 2e-16 ***
+## NUT_VEG_QTY         3.269e-02  1.970e-02   1.659 0.097110 .  
+## NUT_FRUITS_QTY     -6.779e-02  2.307e-02  -2.938 0.003300 ** 
+## SMK_CIG_STATUS1     2.919e-01  6.435e-02   4.536 5.74e-06 ***
+## SMK_CIG_STATUS2     5.102e-01  1.844e-01   2.766 0.005672 ** 
+## SMK_CIG_STATUS3    -7.783e-02  1.064e-01  -0.731 0.464689    
+## ALC_CUR_FREQ0       2.258e-01  1.641e-01   1.376 0.168908    
+## ALC_CUR_FREQ1       7.947e-02  1.371e-01   0.579 0.562266    
+## ALC_CUR_FREQ2       8.622e-02  1.583e-01   0.545 0.585928    
+## ALC_CUR_FREQ3       9.775e-03  1.452e-01   0.067 0.946346    
+## ALC_CUR_FREQ4      -6.336e-01  1.484e-01  -4.270 1.96e-05 ***
+## ALC_CUR_FREQ5      -5.496e-01  1.384e-01  -3.972 7.14e-05 ***
+## ALC_CUR_FREQ6      -5.467e-01  1.505e-01  -3.634 0.000280 ***
+## ALC_CUR_FREQ7      -3.817e-01  1.524e-01  -2.504 0.012273 *  
+## DIS_DEP_EVER1       2.938e-01  8.903e-02   3.300 0.000968 ***
+## DIS_DEP_EVER2       2.218e-02  2.796e-01   0.079 0.936780    
+## DIS_DIAB_TYPE1      7.653e-01  3.266e-01   2.343 0.019126 *  
+## DIS_DIAB_TYPE2      1.566e+00  1.304e-01  12.009  < 2e-16 ***
+## DIS_DIAB_TYPE3      1.659e+00  2.818e-01   5.887 3.96e-09 ***
+## ADM_STUDY_ID2       1.795e+00  1.166e-01  15.392  < 2e-16 ***
+## ADM_STUDY_ID3       6.633e-01  9.820e-02   6.755 1.44e-11 ***
+## ADM_STUDY_ID5       3.537e+00  1.207e-01  29.298  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 5.855 on 41155 degrees of freedom
+## Multiple R-squared:  0.1094,	Adjusted R-squared:  0.1087 
+## F-statistic: 163.1 on 31 and 41155 DF,  p-value: < 2.2e-16
+```
+   
 
 5. **Interpretation and Reporting**
    - Provide a detailed comparison of the methods, discussing their strengths, weaknesses, and suitability for the dataset.
+   # Mean/Median/Mode Imputation
+
+Method: Replace missing values with the mean, median, or mode of the observed data.
+Impact:
+Advantages:
+Simple and easy to implement.
+Preserves the sample size.
+Disadvantages:
+Reduces variability in the data, leading to underestimation of variance.
+Can distort relationships between variables (e.g., correlations, regression coefficients).
+Ignores the uncertainty of the imputed values.
+Use Case: Suitable for preliminary analysis or when the proportion of missing data is very small.
+
+# k-Nearest Neighbors (KNN) Imputation
+
+Method: Replace missing values with the average (or weighted average) of the k-nearest neighbors in the feature space.
+Advantages:
+Captures local patterns in the data.
+Preserves relationships between variables better than mean imputation.
+Disadvantages:
+Computationally expensive for large datasets.
+Sensitive to the choice of k and the distance metric.
+May introduce bias if the data has a complex structure.
+Use Case: Useful for datasets with complex relationships and moderate missingness.
+
+# Multiple Imputation by Chained Equations (MICE)
+
+Method: Generate multiple imputed datasets by modeling each variable with missing data conditional on other variables.
+Impact:
+Advantages:
+Accounts for uncertainty in the imputed values by generating multiple datasets.
+Preserves relationships between variables and the variability of the data.
+Flexible and can handle different types of variables (continuous, categorical).
+Disadvantages:
+Computationally intensive.
+Requires careful specification of the imputation model.
+Use Case: Ideal for datasets with complex missing data mechanisms and when unbiased estimates of uncertainty are needed.
+
    - Reflect on the challenges of handling missing data in health research.
 
+Bias: The analysis may produce biased estimates if missingness is not random (MAR or MNAR).
+Reduced Statistical Power: Missing data reduces the adequate sample size, leading to less precise estimates and lower power to detect significant effects.
+Loss of Generalizability: If the missing data pattern is related to specific subgroups, the results may not be generalizable to the entire population.
+Challenge: Ensuring that the analysis remains valid and generalizable despite missing data.
 
 ## References
