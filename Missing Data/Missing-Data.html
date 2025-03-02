@@ -7507,6 +7507,47 @@ summary(model_original)</code></pre>
 ## Residual standard error: 5.855 on 41155 degrees of freedom
 ## Multiple R-squared:  0.1094, Adjusted R-squared:  0.1087 
 ## F-statistic: 163.1 on 31 and 41155 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Original Dataset (No Imputation)</p>
+<p>Observations Deleted: 22,489 observations were deleted due to
+missingness, reducing the sample size to 18,666. Residual Standard
+Error: 5.684 R-squared: 0.1024 Key Findings: Significant predictors
+include PA_TOTAL_SHORT, PA_TOTAL_SIT_TIME, SDC_AGE_CALC, SDC_GENDER,
+HS_GEN_HEALTH, SMK_CIG_STATUS, ALC_CUR_FREQ, DIS_DIAB_TYPE, and
+ADM_STUDY_ID at 5 percent level of significant. The effect sizes and
+significance levels are based on the complete cases, which may introduce
+bias if the missing data are not MCAR.</p>
+<p>Mean Imputation</p>
+<p>Observations Deleted: None (all missing values were imputed).
+Residual Standard Error: 5.002 R-squared: 0.06947 Key Findings: The
+residual standard error is lower, and the R-squared is slightly lower
+compared to the original dataset. Some predictors that were significant
+in the original dataset (e.g., SDC_EB_ABORIGINAL, NUT_FRUITS_QTY) became
+less significant or insignificant. The effect sizes for some predictors
+(e.g., SDC_GENDER, HS_GEN_HEALTH, DIS_DIAB_TYPE) are smaller than those
+in the original dataset. Mean imputation tends to reduce variability and
+may underestimate the true effect sizes.</p>
+<p>KNN Imputation</p>
+<p>Observations Deleted: None (all missing values were imputed).
+Residual Standard Error: 5.51 R-squared: 0.1003 Key Findings: The
+residual standard error and R-squared are closer to the original dataset
+compared to mean imputation. Some predictors (e.g., SDC_EB_ABORIGINAL,
+NUT_VEG_QTY, NUT_FRUITS_QTY) show different significance levels compared
+to the original dataset. The effect sizes for some predictors (e.g.,
+SDC_GENDER, HS_GEN_HEALTH, DIS_DIAB_TYPE) are closer to the original
+dataset compared to mean imputation. KNN imputation preserves more of
+the data structure and variability than mean imputation.</p>
+<p>MICE Imputation</p>
+<p>Observations Deleted: None (all missing values were imputed).
+Residual Standard Error: 5.855 R-squared: 0.1094 Key Findings: The
+residual standard error is slightly higher, and the R-squared is
+slightly higher compared to the original dataset. Some predictors (e.g.,
+SDC_EB_ABORIGINAL, NUT_FRUITS_QTY, DIS_DEP_EVER) show different
+significance levels compared to the original dataset. The effect sizes
+for some predictors (e.g., SDC_GENDER, HS_GEN_HEALTH, DIS_DIAB_TYPE) are
+closer to the original dataset compared to mean and KNN imputation. MICE
+imputation accounts for the uncertainty in imputed values and typically
+produces more reliable estimates compared to mean and KNN
+imputation.</p>
 <ol start="5" style="list-style-type: decimal">
 <li><strong>Interpretation and Reporting</strong>
 <ul>
