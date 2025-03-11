@@ -2,8 +2,9 @@
 title: "Assignment: Data Wrangling and Visualization"
 output:
   html_document:
-    keep_md: yes
-  pdf_document: default
+    keep_md: true
+# output: pdf_document
+# latex_engine: xelatex
 ---
 
 
