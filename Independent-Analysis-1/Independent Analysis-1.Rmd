@@ -1,0 +1,35 @@
+---
+title: "Random Forest"
+author: "Syed Jafar Raza Rizvi <br> NSID: cfr954 <br> Student ID: 11344782"
+output:
+  html_document:
+    keep_md: true
+date: "2025-02-11"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(visdat)
+library(naniar)
+library(mice)
+library(bookdown)
+library(VIM)
+library(sjPlot)
+library(C50)
+library(finalfit)
+library(knitr)
+library(gtsummary)
+library(mlbench)
+library(vip)
+library(rsample)
+library(rpart.plot)
+library(tune)
+library(recipes)
+library(yardstick)
+library(parsnip)
+library(glmnet)
+library(themis)
+library(microbenchmark)
+library(arsenal)
+library(workflows) 
+```
