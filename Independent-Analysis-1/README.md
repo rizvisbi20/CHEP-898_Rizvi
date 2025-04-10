@@ -1,6 +1,7 @@
 We are going to use a large repository of synthetic patient health data to deveop a risk predictor model that can  accurately predict the future occurrence of new-onset AF for individual patients?
 
-Dataset Description 
+## Dataset Description 
+
 This is a synthetic cohort of ~100,000 patients who have no prior history of AF and had a baseline ECG performed 
 between January 2010 and January 2023, followed by a minimum follow-up of 12 months. 
 Current or prior AF/flutter will be excluded on the basis of baseline ECG plus review of prior 
@@ -11,9 +12,12 @@ This dataset is the part of [2025 Case Studies in Data Analysis Competition](htt
 the title of the case study is 
 [Prediction of New Onset Atrial Fibrillation Using Routinely Reported 12-Lead ECG Variables and Electronic Health Data](https://ssc.ca/en/case-study/prediction-new-onset-atrial-fibrillation-using-routinely-reported-12-lead-ecg-variables)
 
-Dataset Size: 49 MB
+## Dataset Size: 
+49 MB
 
-Variables
+
+## Variables
+
 Core demographics for each patient will be provided, inclusive of age and birth sex, 
 followed by ICD-10-CCA/CCI coded baseline comorbidities, cardiac history, and coding for which cardiac 
 procedures each patient has undergone. Diagnostic testing variables will include routinely reported ECG variables, 
@@ -21,3 +25,5 @@ patient location at time of baseline ECG (in-patient versus out-patient), follow
 test variables captured surrounding the time of each ECG. Coding of all cardiac medications actively prescribed at 
 time of baseline ECG will also be provided. Please see this link [SSC2025_study01_datadic_v02](https://ssc.ca/sites/default/files/imce/ssc2025_study01_datadic_v02.xlsx) for a full list of 
 variables and definitions.
+
+
